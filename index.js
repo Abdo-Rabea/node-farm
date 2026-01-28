@@ -30,20 +30,69 @@ const http = require("http");
 // you can write hear blocking code as it will run only once when the server starts.
 // * note: the server callback is the only that is called once for each request
 const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, "utf-8");
+const tempCard = fs.readFileSync(
+  `${__dirname}/templates/template-card.html`,
+  "utf-8"
+);
+const tempOverview = fs.readFileSync(
+  `${__dirname}/templates/template-overview.html`,
+  "utf-8"
+);
+const tempProduct = fs.readFileSync(
+  `${__dirname}/templates/template-product.html`,
+  "utf-8"
+);
+
 const dataObj = JSON.parse(data);
 
+// helper functions
+
+/**
+ *
+ * @param {string} temp
+ * @param {Object} product
+ * @returns html card filled with product data
+ */
+function replaceCardTemplate(temp, product) {
+  let output = temp.replace(/{%IMAGE%}/g, product.image);
+  output = output.replace(/{%PRODUCT_NAME%}/g, product.productName);
+  output = output.replace(
+    /{%NOT_ORGANIC%}/g,
+    product.organic ? "" : "not-organic"
+  );
+  output = output.replace(/{%QUANTITY%}/g, product.quantity);
+  output = output.replace(/{%PRICE%}/g, product.price);
+  output = output.replace(/{%ID%}/g, product.id);
+
+  return output;
+}
+
 const server = http.createServer((req, res) => {
-  console.log(req.url);
   const path = req.url;
-  // *
-  if (path === "/" || path === "/overview") res.end("Hello from overview");
-  if (path === "/api") {
+
+  // overview
+  if (path === "/" || path === "/overview") {
+    const cardsHtml = dataObj
+      .map((product) => replaceCardTemplate(tempCard, product))
+      .join("");
+
+    const overviewHtml = tempOverview.replace(/{%PRODUCT_CARDS%}/g, cardsHtml);
+    res.writeHead(200, {
+      "Content-type": "text/html",
+    });
+    res.end(overviewHtml);
+  }
+  // api
+  else if (path === "/api") {
     res.writeHead(200, {
       // you give the browser the type of returned data and it deals with it the write way (simple usecase: pretty-print)
       "Content-type": "application/json",
     });
     res.end(data);
-  } else if (path === "/products") res.end("Hello from products");
+  }
+  // product
+  else if (path === "/product") res.end("Hello from products");
+  // Not found
   else {
     res.writeHead(404, {
       "Content-type": "text/html",
