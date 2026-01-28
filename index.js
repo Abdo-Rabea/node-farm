@@ -1,6 +1,9 @@
 const fs = require("fs");
 const http = require("http");
 const url = require("url");
+
+// . here refers to current directory (just as __dirname) and not the localtion where we run the application from.
+const replaceTemplate = require("./modules/replaceTemplate");
 ///////////////////////////////////////////////////////////////////////////
 // Dealing with files
 // reading file
@@ -54,24 +57,6 @@ const dataObj = JSON.parse(data);
  * @param {Object} product
  * @returns html card filled with product data
  */
-function replaceTemplate(temp, product) {
-  let output = temp.replace(/{%IMAGE%}/g, product.image);
-  output = output.replace(/{%PRODUCT_NAME%}/g, product.productName);
-  output = output.replace(
-    /{%NOT_ORGANIC%}/g,
-    product.organic ? "" : "not-organic"
-  );
-  output = output.replace(/{%QUANTITY%}/g, product.quantity);
-  output = output.replace(/{%PRICE%}/g, product.price);
-  output = output.replace(/{%ID%}/g, product.id);
-
-  // product only
-  output = output.replace(/{%DESCRIPTION%}/g, product.description);
-  output = output.replace(/{%FROM%}/g, product.from);
-  output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
-
-  return output;
-}
 
 const server = http.createServer((req, res) => {
   const { pathname: pathName, query } = url.parse(req.url, true);
