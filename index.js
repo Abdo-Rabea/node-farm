@@ -2,6 +2,8 @@ const fs = require("fs");
 const http = require("http");
 const url = require("url");
 
+const slugify = require("slugify");
+
 // . here refers to current directory (just as __dirname) and not the localtion where we run the application from.
 const replaceTemplate = require("./modules/replaceTemplate");
 ///////////////////////////////////////////////////////////////////////////
@@ -49,14 +51,11 @@ const tempProduct = fs.readFileSync(
 
 const dataObj = JSON.parse(data);
 
-// helper functions
-
-/**
- *
- * @param {string} temp
- * @param {Object} product
- * @returns html card filled with product data
- */
+// testing slugify
+const slugs = dataObj.map((product) =>
+  slugify(product.productName, { replacement: "-", lower: true })
+);
+console.log(slugs);
 
 const server = http.createServer((req, res) => {
   const { pathname: pathName, query } = url.parse(req.url, true);
